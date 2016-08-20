@@ -53,7 +53,6 @@ namespace TopKek
 
 			// Создаем endPoint по информации об удаленном хосте
 			IPEndPoint endPoint = new IPEndPoint(remoteIPAddress, remotePort);
-			timepost(10000);
 
 			try
 			{
@@ -70,38 +69,6 @@ namespace TopKek
 			{
 				// Закрыть соединение
 				sender.Close();
-			}
-		}
-		
-		public static void timepost(int millis){
-			try{
-				WebRequest request = WebRequest.Create ("http://localhost:8553/setAverageTime");
-				request.Method = "POST";
-				byte[] byteArray = Encoding.UTF8.GetBytes (millis.ToString());
-				Console.WriteLine(millis.ToString());
-				request.ContentType = "text/html";
-				request.ContentLength = byteArray.Length;
-				Stream dataStream = request.GetRequestStream ();
-				dataStream.Write (byteArray, 0, byteArray.Length);
-				dataStream.Close ();
-			}
-			catch(WebException){
-			}
-			catch(SocketException){
-			}
-			try{
-				WebRequest request = WebRequest.Create ("http://62.84.116.86:8553/setAverageTime");
-				request.Method = "POST";
-				byte[] byteArray = Encoding.UTF8.GetBytes (millis.ToString());
-				request.ContentType = "text/html";
-				request.ContentLength = byteArray.Length;
-				Stream dataStream = request.GetRequestStream ();
-				dataStream.Write (byteArray, 0, byteArray.Length);
-				dataStream.Close ();
-			}
-			catch(WebException){
-			}
-			catch(SocketException){
 			}
 		}
 		public static void post(){
@@ -152,34 +119,12 @@ namespace TopKek
 
 			try
 			{
-				long oldtime=0;
-				long newtime=0;
-				int count = 0;
-				long summ = 0;
-				
-				timepost(10000);
 				while (true)
 				{
 					// Ожидание дейтаграммы
 					byte[] receiveBytes = receivingUdpClient.Receive(ref RemoteIpEndPoint);
 					bool trig = false;
 					int val = 0;
-					if (oldtime == 0){
-						oldtime = DateTime.Now.Ticks/10000; 
-					}else if(count == 360){
-						newtime = DateTime.Now.Ticks/10000; 
-						summ += newtime -oldtime;
-						oldtime = DateTime.Now.Ticks/10000; 
-						count++;
-						timepost(Convert.ToInt32(summ / count));
-						count = 0;
-						summ = 0;
-					}else{
-						newtime = DateTime.Now.Ticks/10000; 
-						summ += newtime -oldtime;
-						oldtime = DateTime.Now.Ticks/10000; 
-						count++;
-					}
 					while(!trig)
 					{
 						if(receiveBytes[val*3]==0 && receiveBytes[val*3+1]==0 &&receiveBytes[val*3+2]==0){
@@ -199,7 +144,7 @@ namespace TopKek
 						if(znak==0){
 							values[i] = values[i] * -1;
 						}
-						
+
 						Console.WriteLine("Значение с датчика №" + i + ": " + values[i] + " C");
 						Console.WriteLine();
 					}
@@ -212,7 +157,8 @@ namespace TopKek
 					for(int i = 0; i < countDevices; i++){
 						File.AppendAllText(path, values[i].ToString()+" ;");
 					}
-					File.AppendAllText(path, "N");
+					string end = "T"+DateTime.UtcNow.Hour.ToString() + ":"+ DateTime.UtcNow.Minute.ToString()+"TN";
+					File.AppendAllText(path, end);
 					Thread.Sleep(5);
 				}
 			}
