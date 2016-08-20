@@ -157,7 +157,9 @@ namespace TopKek
 					for(int i = 0; i < countDevices; i++){
 						File.AppendAllText(path, values[i].ToString()+" ;");
 					}
-					string end = "T"+DateTime.UtcNow.Hour.ToString() + ":"+ DateTime.UtcNow.Minute.ToString()+"TN";
+					DateTime t = DateTime.Now;
+					string time = t.ToString("dd.MM.yyyy.HH:mm");
+					File.AppendAllText(path, "T"+time+"TN")
 					File.AppendAllText(path, end);
 					Thread.Sleep(5);
 				}
